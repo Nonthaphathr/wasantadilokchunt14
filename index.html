@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องมือช่วยแต่งวสันตดิลกฉันท์ ๑๔</title>
+  <title>เครื่องมือช่วยแต่งวสันตดิลกฉันท์ ๑๔ v.1.1/title>
   <script src="/_sdk/element_sdk.js"></script>
   <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap');
@@ -18,7 +18,7 @@
         }
 
         .container {
-            max-width: 900px; /* ขยายความกว้างเล็กน้อยเพราะวรรคหน้ามี 8 คำ */
+            max-width: 900px;
             margin: 0 auto;
            background: white;
            border-radius: 15px;
@@ -116,7 +116,7 @@
 
         .word-inputs {
             display: grid;
-           grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* ปรับขนาด minmax ให้เล็กลงเพื่อให้พอดีกับ 8 คำ */
+           grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             gap: 8px;
            margin-bottom: 15px;
         }
@@ -146,7 +146,7 @@
         }
 
        .word-type {
-            font-size: 10px; /* ลดขนาดตัวอักษรประเภทคำ */
+            font-size: 10px;
            font-weight: 600;
             padding: 2px 6px;
            border-radius: 12px;
@@ -215,7 +215,6 @@
             position: relative;
         }
         
-        /* สีสำหรับสัมผัสระหว่างบท */
         .syllable.samphus-cross {
              border: 2px solid #e91e63;
              background-color: #e91e63 !important;
@@ -390,7 +389,7 @@
         }
         
         .result-stanza-gap {
-            margin-bottom: 25px; /* Gap between stanzas */
+            margin-bottom: 25px;
         }
 
         .verse-line {
@@ -423,7 +422,7 @@
             }
             
             .word-inputs {
-                grid-template-columns: repeat(4, 1fr); /* Mobile: 4 columns per row */
+                grid-template-columns: repeat(4, 1fr);
             }
         }
    </style>
@@ -442,7 +441,7 @@
    <div class="pattern-info">
     <h3 style="text-align: center; color: #2c3e50; margin-bottom: 15px;">ฉันทลักษณ์วสันตดิลกฉันท์ ๑๔</h3>
     <div style="text-align: center; display: flex; flex-direction: column; gap: 15px; align-items: center;">
-        <a href="https://www.homelittlegirl.com/index.php?topic=14038.0" target="_blank" rel="noopener noreferrer" style="display: inline-block; transition: transform 0.3s ease;">
+        <a href="https://www.homelittlegirl.com/index.php?topic=14045.0" target="_blank" rel="noopener noreferrer" style="display: inline-block; transition: transform 0.3s ease;">
             <img src="https://img5.pic.in.th/file/secure-sv1/logo-vichakarngo-8.png" alt="Home Little Girl" style="max-width: 200px; max-height: 80px; width: auto; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         </a> 
         <a href="https://nonthaphathr.github.io/datalahu/" target="_blank" rel="noopener noreferrer" style="display: inline-block; transition: transform 0.3s ease;">
@@ -452,7 +451,7 @@
    </div>
    
    <div class="samphus-info">
-    <h4 style="margin-top: 0; color: #e67e22;">📝 หลักการสัมผัส (ตามที่กำหนด)</h4>
+    <h4 style="margin-top: 0; color: #e67e22;">📝 หลักการสัมผัส</h4>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
      <div style="display: flex; align-items: center; gap: 5px;"><span style="background: #e67e22; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">ส่ง</span> <span>ส่งสัมผัสในบท</span></div>
      <div style="display: flex; align-items: center; gap: 5px;"><span style="background: #9b59b6; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">รับ</span> <span>รับสัมผัสในบท</span></div>
@@ -789,6 +788,40 @@
             if (hasEndingConsonant(word)) {
                 return false; 
             }
+
+            // ** แก้ไขตรรกะใหม่: ตรวจสอบสระเสียงยาวที่บังคับให้เป็นครุ ก่อนตรวจสอบสระเสียงสั้น **
+            // กรณีคำอย่าง "เหตุ", "ชาติ" ที่มีสระยาวนำหน้า (เ-, -า-) แต่มักมีสระสั้นต่อท้าย (-ุ, -ิ)
+            // ถ้าคำนั้นมีสระยาว และไม่มีรูปสระที่ทำให้เสียงสั้นลง (เช่น ะ, ็) ให้ถือว่าเป็นครุ
+
+            const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
+            const shorteners = ["ะ", "็"]; // สระอะ และ ไม้ไต่คู้
+
+            let hasLongVowel = false;
+            for (let v of forceKruLongVowels) {
+                if (processedWord.includes(v)) {
+                    hasLongVowel = true;
+                    break;
+                }
+            }
+
+            if (hasLongVowel) {
+                let isShortened = false;
+                for (let s of shorteners) {
+                    if (processedWord.includes(s)) {
+                        isShortened = true;
+                        break;
+                    }
+                }
+                // ตรวจสอบกรณีสระประสมเสียงสั้นที่มีรูปสระยาวผสม (เช่น เอาะ, เออะ, อัวะ)
+                if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ")) {
+                    isShortened = true;
+                }
+
+                if (!isShortened) {
+                    // มีสระยาว และไม่ถูกทำให้สั้น -> เป็นครุ (เช่น เหตุ, ชาติ, เกตุ)
+                    return false; 
+                }
+            }
  
             const shortVowelPatterns = ["อะ", "อิ", "อึ", "อุ", "เอะ", "แอะ", "โอะ", "เอาะ", "เอียะ", "เอือะ", "อัวะ", "เออะ", "ะ", "ิ", "ึ", "ุ", "เ-ะ", "แ-ะ", "โ-ะ", "เ-าะ"];
             
@@ -798,6 +831,7 @@
                 }
             }
  
+            // เช็คสระยาวพื้นฐาน (เผื่อกรณีหลุดจาก logic ข้างบน)
             const longVowelPatterns = ["อา", "อี", "อื", "อู", "เอ", "แอ", "โอ", "ออ", "เออ", "า", "ี", "ื", "ู", "เ-", "แ-", "โ-", "อ-", "เ-อ"];
             
             for (let vowel of longVowelPatterns) {
@@ -906,27 +940,16 @@
         }
  
         function checkAllSamphus() {
-            // ตรวจสอบสัมผัสตามข้อมูลวสันตดิลกฉันท์ ๑๔ ที่ระบุ
-            // 1. ท้ายวรรค 1 (คำที่ 8) -> คำที่ 3 วรรค 2
-            // 2. ท้ายวรรค 2 (คำที่ 6) -> ท้ายวรรค 3 (คำที่ 8)
-            // 3. เชื่อมบท (ท้ายวรรค 4 -> ท้ายวรรค 2 บทถัดไป)
-            
             const samphusConnections = [
-                // บทที่ 1
                 { send: { verse: 1, position: 8 }, receive: { verse: 2, position: 3 }, type: 'internal' },
                 { send: { verse: 2, position: 6 }, receive: { verse: 3, position: 8 }, type: 'internal' },
                 
-                // สัมผัสระหว่างบท (ท้ายบท 1 -> ท้ายวรรค 2 ของบท 2)
-                // คำสุดท้ายของวรรคหลังในบทที่ 2 คือตำแหน่งรับสัมผัส (Verse 6, Word 6)
                 { send: { verse: 4, position: 6 }, receive: { verse: 6, position: 6 }, type: 'cross' },
 
-                // บทที่ 2
                 { send: { verse: 5, position: 8 }, receive: { verse: 6, position: 3 }, type: 'internal' },
-                // ท้ายวรรค 2 บท 2 (คำที่รับสัมผัสระหว่างบท) ส่งต่อไปยังท้ายวรรค 3 บท 2
                 { send: { verse: 6, position: 6 }, receive: { verse: 7, position: 8 }, type: 'internal' }
             ];
             
-            // ลบ feedback เก่าออกให้หมดก่อน
             document.querySelectorAll('.samphus-feedback').forEach(el => el.remove());
 
             samphusConnections.forEach(connection => {
@@ -979,7 +1002,6 @@
             let resultHTML = '';
             let hasContent = false;
             
-            // สร้างชุดข้อมูล 2 บท
             const stanzas = [
                 { start: 1, end: 4 },
                 { start: 5, end: 8 }
@@ -1036,11 +1058,10 @@
                 
                 if (words.length > 0) {
                     verses.push(words.join(''));
-                } else if (verse <= 8) { // ถ้าวรรคว่างให้ใส่บรรทัดว่าง หรือข้ามไป
+                } else if (verse <= 8) { 
                     // verses.push(""); 
                 }
                 
-                // เพิ่มบรรทัดว่างระหว่างบท (หลังจบวรรคที่ 4)
                 if (verse === 4 && verses.length > 0) {
                     verses.push(""); 
                 }
