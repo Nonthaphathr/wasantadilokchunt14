@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องมือช่วยแต่งวสันตดิลกฉันท์ ๑๔</title>
+  <title>เครื่องมือช่วยแต่งวสันตดิลกฉันท์ ๑๔ (Auto-Save + Counter)</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap');
@@ -15,6 +15,7 @@
             margin: 0;
             padding: 20px;
            min-height: 100%;
+           padding-bottom: 50px; /* Space for footer */
         }
 
         .container {
@@ -338,6 +339,11 @@
             margin: 0;
         }
 
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
         .copy-button {
            background: #3498db;
             color: white;
@@ -364,6 +370,26 @@
 
        .copy-button.copied {
            background: #27ae60;
+        }
+
+        .reset-button {
+           background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+           border-radius: 8px;
+            font-size: 14px;
+           font-weight: 500;
+            cursor: pointer;
+           transition: all 0.3s ease;
+            display: flex;
+           align-items: center;
+            gap: 5px;
+        }
+        
+        .reset-button:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
         }
 
        .result-content {
@@ -396,6 +422,24 @@
             color: #2c3e50;
            font-weight: 500;
         }
+        
+        .footer-counter {
+            margin-top: 40px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .counter-container {
+            margin-top: 10px;
+            display: inline-block;
+            padding: 5px 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
 
         @media (max-width: 768px) {
             .container {
@@ -417,8 +461,14 @@
                 align-items: stretch;
             }
 
-           .copy-button {
+           .button-group {
+               flex-direction: column;
+               width: 100%;
+           }
+
+           .copy-button, .reset-button {
                justify-content: center;
+               width: 100%;
             }
             
             .word-inputs {
@@ -614,7 +664,11 @@
 
    <div class="result-section">
     <div class="result-header">
-     <h3 class="result-title">วสันตดิลกฉันท์ ๑๔ (๒ บท)</h3><button class="copy-button" id="copy-button" onclick="copyToClipboard()"> 📋 คัดลอก </button>
+     <h3 class="result-title">วสันตดิลกฉันท์ ๑๔ (๒ บท)</h3>
+     <div class="button-group">
+         <button class="reset-button" onclick="resetData()"> 🗑️ ล้างข้อมูล </button>
+         <button class="copy-button" id="copy-button" onclick="copyToClipboard()"> 📋 คัดลอก </button>
+     </div>
     </div>
     <div class="result-content" id="result-content">
      <div class="result-placeholder">
@@ -622,12 +676,25 @@
      </div>
     </div>
    </div>
+   
+   <div class="footer-counter">
+       <p>จำนวนผู้เข้าชม</p>
+       <div class="counter-container">
+           <a href="https://www.hitwebcounter.com" target="_blank">
+           <img src="https://hitwebcounter.com/counter/counter.php?page=11837598&style=0006&nbdigits=5&type=page&initCount=0" title="Free Counter" Alt="web counter" border="0" /></a>
+       </div>
+       <p style="font-size: 12px; margin-top: 5px; color: #95a5a6;">(ตัวนับฟรีจาก HitWebCounter)</p>
+   </div>
+   
   </div>
   <script>
         // Default configuration
         const defaultConfig = {
             app_title: "เครื่องมือช่วยแต่งวสันตดิลกฉันท์ ๑๔ (๒ บท)",
         };
+        
+        // Storage Key
+        const STORAGE_KEY = 'vasantadilok_14_data';
  
         // Function to check if two words have samphus (rhyme)
         function checkSamphus(word1, word2) {
@@ -693,7 +760,7 @@
             
             for (let specialWord of specialAiWords) {
                 if (word === specialWord || word.endsWith(specialWord)) {
-                     return true;
+                      return true;
                 }
             }
             return false;
@@ -786,9 +853,8 @@
                 return false; 
             }
 
-            // ** แก้ไขตรรกะใหม่: ตรวจสอบสระเสียงยาวที่บังคับให้เป็นครุ ก่อนตรวจสอบสระเสียงสั้น **
             const forceKruLongVowels = ["า", "ี", "ื", "ู", "เ", "แ", "โ", "อ"];
-            const shorteners = ["ะ", "็"]; // สระอะ และ ไม้ไต่คู้
+            const shorteners = ["ะ", "็"]; 
 
             let hasLongVowel = false;
             for (let v of forceKruLongVowels) {
@@ -800,19 +866,19 @@
 
             if (hasLongVowel) {
                 let isShortened = false;
+                
                 for (let s of shorteners) {
                     if (processedWord.includes(s)) {
                         isShortened = true;
                         break;
                     }
                 }
-                // ตรวจสอบกรณีสระประสมเสียงสั้นที่มีรูปสระยาวผสม (เช่น เอาะ, เออะ, อัวะ)
+                
                 if (processedWord.includes("เอาะ") || processedWord.includes("เออะ") || processedWord.includes("อัวะ")) {
                     isShortened = true;
                 }
 
                 if (!isShortened) {
-                    // มีสระยาว และไม่ถูกทำให้สั้น -> เป็นครุ (เช่น เหตุ, ชาติ, เกตุ)
                     return false; 
                 }
             }
@@ -825,7 +891,6 @@
                 }
             }
  
-            // เช็คสระยาวพื้นฐาน (เผื่อกรณีหลุดจาก logic ข้างบน)
             const longVowelPatterns = ["อา", "อี", "อื", "อู", "เอ", "แอ", "โอ", "ออ", "เออ", "า", "ี", "ื", "ู", "เ-", "แ-", "โ-", "อ-", "เ-อ"];
             
             for (let vowel of longVowelPatterns) {
@@ -915,6 +980,9 @@
             
             if (totalFilled === 0) {
                feedback.textContent = `กรุณากรอกคำในวรรคที่ ${verseNumber}`;
+               feedback.style.backgroundColor = '#e8f4f8';
+               feedback.style.borderColor = '#bee5eb';
+               feedback.style.color = '#2c3e50';
             } else if (errors.length === 0 && totalFilled === inputs.length) {
                feedback.textContent = `✅ วรรคที่ ${verseNumber} ถูกต้องทั้งหมด!`;
                feedback.style.backgroundColor = '#d4edda';
@@ -1091,15 +1159,79 @@
                 }, 2000);
             });
         }
+
+        // --- LocalStorage Functions ---
+        
+        function saveData() {
+            const inputs = document.querySelectorAll('.word-input');
+            const data = {};
+            
+            inputs.forEach(input => {
+                const key = `v${input.dataset.verse}_p${input.dataset.position}`;
+                data[key] = input.value;
+            });
+            
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+        
+        function loadData() {
+            const savedJSON = localStorage.getItem(STORAGE_KEY);
+            if (!savedJSON) return;
+            
+            const data = JSON.parse(savedJSON);
+            const inputs = document.querySelectorAll('.word-input');
+            
+            inputs.forEach(input => {
+                const key = `v${input.dataset.verse}_p${input.dataset.position}`;
+                if (data[key]) {
+                    input.value = data[key];
+                    // Trigger check logic immediately to restore colors
+                    checkWord(input);
+                }
+            });
+            
+            // Update result display and samphus after loading all
+            updateResult();
+            checkAllSamphus();
+        }
+        
+        function resetData() {
+            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
+                localStorage.removeItem(STORAGE_KEY);
+                
+                const inputs = document.querySelectorAll('.word-input');
+                inputs.forEach(input => {
+                    input.value = '';
+                    input.classList.remove('correct', 'incorrect', 'samphus-send', 'samphus-receive');
+                });
+                
+                // Reset feedbacks
+                document.querySelectorAll('.verse-feedback').forEach(fb => {
+                    fb.textContent = '';
+                    fb.style.backgroundColor = '#e8f4f8';
+                    fb.style.borderColor = '#bee5eb';
+                    fb.style.color = '#2c3e50';
+                });
+
+                // Reset samphus feedbacks
+                document.querySelectorAll('.samphus-feedback').forEach(el => el.remove());
+                
+                updateResult();
+            }
+        }
  
         document.addEventListener('DOMContentLoaded', function() {
+            // Load saved data
+            loadData();
+
             const allInputs = document.querySelectorAll('.word-input');
-           allInputs.forEach(input => {
+            allInputs.forEach(input => {
                input.addEventListener('input', function() {
                    checkWord(this);
                    updateResult();
-                    checkAllSamphus();
-                });
+                   checkAllSamphus();
+                   saveData(); // Auto-save logic
+               });
             });
         });
    </script>
