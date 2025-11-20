@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องมือช่วยแต่งวสันตดิลกฉันท์ ๑๔ (Auto-Save + Counter)</title>
+  <title>เครื่องมือช่วยแต่งวสันตดิลกฉันท์ ๑๔ V.1.5 (Check Samphus Sam + New Counter)</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap');
@@ -273,7 +273,7 @@
             padding: 2px 4px;
            border-radius: 8px;
             color: white;
-           margin-top: 2px;
+            margin-top: 2px;
         }
 
        .samphus-send-indicator { background-color: #e67e22; }
@@ -290,7 +290,7 @@
         }
 
        .samphus-feedback {
-           margin-top: 5px;
+            margin-top: 5px;
             padding: 5px 10px;
            border-radius: 6px;
             font-size: 12px;
@@ -303,10 +303,16 @@
             color: #155724;
         }
 
-       .samphus-incorrect {
+        .samphus-incorrect {
            background-color: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
+        }
+        
+        .samphus-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
         }
 
        .samphus-pending {
@@ -316,7 +322,7 @@
         }
 
        .result-section {
-           margin-top: 30px;
+            margin-top: 30px;
            background: #f8f9fa;
             padding: 25px;
            border-radius: 12px;
@@ -411,7 +417,7 @@
         }
 
         .result-verse {
-           margin-bottom: 5px;
+            margin-bottom: 5px;
         }
         
         .result-stanza-gap {
@@ -434,11 +440,20 @@
         
         .counter-container {
             margin-top: 10px;
-            display: inline-block;
-            padding: 5px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 15px;
             background: white;
-            border-radius: 5px;
-            border: 1px solid #eee;
+            border-radius: 20px;
+            border: 1px solid #cbd5e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .counter-badge {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
         }
 
         @media (max-width: 768px) {
@@ -680,10 +695,10 @@
    <div class="footer-counter">
        <p>จำนวนผู้เข้าชม</p>
        <div class="counter-container">
-           <a href="https://www.hitwebcounter.com" target="_blank">
-           <img src="https://hitwebcounter.com/counter/counter.php?page=11837598&style=0006&nbdigits=5&type=page&initCount=0" title="Free Counter" Alt="web counter" border="0" /></a>
+           <span>👁️</span>
+           <span id="view-count" class="counter-badge">...</span>
        </div>
-       <p style="font-size: 12px; margin-top: 5px; color: #95a5a6;">(ตัวนับฟรีจาก HitWebCounter)</p>
+       <p style="font-size: 12px; margin-top: 5px; color: #95a5a6;">(Powered by CounterAPI)</p>
    </div>
    
   </div>
@@ -709,8 +724,60 @@
             const sound2 = getVowelAndFinalSound(word2);
             
             return sound1.vowel === sound2.vowel && 
-                  sound1.finalGroup === sound2.finalGroup && 
-                  sound1.vowel !== '' && sound1.finalGroup !== '';
+                   sound1.finalGroup === sound2.finalGroup && 
+                   sound1.vowel !== '' && sound1.finalGroup !== '';
+        }
+
+        // Function to get Initial Consonant Sound Group (Checking Homophones)
+        function getInitialConsonantGroup(word) {
+            if (!word) return '';
+            word = word.trim().replace(/[่้๊๋์]/g, ''); // Remove tones
+            
+            let startIndex = 0;
+            if ("เแโใไ".includes(word.charAt(0))) {
+                startIndex = 1;
+            }
+            
+            if (startIndex >= word.length) return '';
+            
+            const char = word.charAt(startIndex);
+            
+            // Group mappings for sound check
+            if ('ก'.includes(char)) return 'k';
+            if ('ขฃคฅฆ'.includes(char)) return 'kh';
+            if ('ง'.includes(char)) return 'ng';
+            if ('จ'.includes(char)) return 'j';
+            if ('ฉชฌ'.includes(char)) return 'ch';
+            if ('ซศษส'.includes(char)) return 's';
+            if ('ยญ'.includes(char)) return 'y';
+            if ('ฎด'.includes(char)) return 'd';
+            if ('ฏต'.includes(char)) return 't';
+            if ('ฐฑฒถทธ'.includes(char)) return 'th';
+            if ('ณน'.includes(char)) return 'n';
+            if ('บ'.includes(char)) return 'b';
+            if ('ป'.includes(char)) return 'p';
+            if ('ผพภฟฝ'.includes(char)) {
+                 if ('ฝฟ'.includes(char)) return 'f';
+                 return 'ph';
+            }
+            if ('ม'.includes(char)) return 'm';
+            if ('ร'.includes(char)) return 'r';
+            if ('ลฬ'.includes(char)) return 'l';
+            if ('ว'.includes(char)) return 'w';
+            if ('หฮ'.includes(char)) return 'h';
+            if ('อ'.includes(char)) return 'a';
+            
+            return char; // Fallback
+        }
+
+        // Check for homophones
+        function isHomophone(word1, word2) {
+             if (!checkSamphus(word1, word2)) return false;
+             
+             const init1 = getInitialConsonantGroup(word1);
+             const init2 = getInitialConsonantGroup(word2);
+             
+             return init1 === init2 && init1 !== '';
         }
  
         function getVowelAndFinalSound(word) {
@@ -1026,17 +1093,31 @@
                        const hasSamphus = checkSamphus(sendWord, receiveWord);
                        
                        const sendFeedback = document.createElement('div');
-                       sendFeedback.className = `samphus-feedback ${hasSamphus ? 'samphus-correct' : 'samphus-incorrect'}`;
-                       
                        const receiveFeedback = document.createElement('div');
-                       receiveFeedback.className = `samphus-feedback ${hasSamphus ? 'samphus-correct' : 'samphus-incorrect'}`;
                        
                        let connectionText = connection.type === 'cross' ? ' (ข้ามบท)' : '';
 
                        if (hasSamphus) {
-                           sendFeedback.textContent = `✅ สัมผัสกับ "${receiveWord}"${connectionText}`;
-                           receiveFeedback.textContent = `✅ สัมผัสกับ "${sendWord}"${connectionText}`;
+                           // Check for "Repeat Rhyme" (Samphus Sam)
+                           const isExactSame = sendWord === receiveWord;
+                           const isSameSound = isHomophone(sendWord, receiveWord);
+                           
+                           if (isExactSame || isSameSound) {
+                               sendFeedback.className = 'samphus-feedback samphus-warning';
+                               receiveFeedback.className = 'samphus-feedback samphus-warning';
+                               
+                               const warningMsg = isExactSame ? 'คำซ้ำ' : 'เสียงพ้อง';
+                               sendFeedback.textContent = `⚠️ โปรดระวัง "สัมผัสซ้ำ" (${warningMsg}) กับ "${receiveWord}"`;
+                               receiveFeedback.textContent = `⚠️ โปรดระวัง "สัมผัสซ้ำ" (${warningMsg}) กับ "${sendWord}"`;
+                           } else {
+                               sendFeedback.className = 'samphus-feedback samphus-correct';
+                               receiveFeedback.className = 'samphus-feedback samphus-correct';
+                               sendFeedback.textContent = `✅ สัมผัสกับ "${receiveWord}"${connectionText}`;
+                               receiveFeedback.textContent = `✅ สัมผัสกับ "${sendWord}"${connectionText}`;
+                           }
                        } else {
+                           sendFeedback.className = 'samphus-feedback samphus-incorrect';
+                           receiveFeedback.className = 'samphus-feedback samphus-incorrect';
                            sendFeedback.textContent = `❌ ไม่สัมผัสกับ "${receiveWord}"${connectionText}`;
                            receiveFeedback.textContent = `❌ ไม่สัมผัสกับ "${sendWord}"${connectionText}`;
                        }
@@ -1159,7 +1240,7 @@
                 }, 2000);
             });
         }
-
+        
         // --- LocalStorage Functions ---
         
         function saveData() {
@@ -1185,12 +1266,10 @@
                 const key = `v${input.dataset.verse}_p${input.dataset.position}`;
                 if (data[key]) {
                     input.value = data[key];
-                    // Trigger check logic immediately to restore colors
                     checkWord(input);
                 }
             });
             
-            // Update result display and samphus after loading all
             updateResult();
             checkAllSamphus();
         }
@@ -1205,35 +1284,8 @@
                     input.classList.remove('correct', 'incorrect', 'samphus-send', 'samphus-receive');
                 });
                 
-                // Reset feedbacks
                 document.querySelectorAll('.verse-feedback').forEach(fb => {
                     fb.textContent = '';
                     fb.style.backgroundColor = '#e8f4f8';
                     fb.style.borderColor = '#bee5eb';
-                    fb.style.color = '#2c3e50';
                 });
-
-                // Reset samphus feedbacks
-                document.querySelectorAll('.samphus-feedback').forEach(el => el.remove());
-                
-                updateResult();
-            }
-        }
- 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load saved data
-            loadData();
-
-            const allInputs = document.querySelectorAll('.word-input');
-            allInputs.forEach(input => {
-               input.addEventListener('input', function() {
-                   checkWord(this);
-                   updateResult();
-                   checkAllSamphus();
-                   saveData(); // Auto-save logic
-               });
-            });
-        });
-   </script>
- </body>
-</html>
